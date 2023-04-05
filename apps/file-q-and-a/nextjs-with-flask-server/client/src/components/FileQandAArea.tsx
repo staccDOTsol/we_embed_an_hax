@@ -2,12 +2,14 @@ import React, { memo, useCallback, useRef, useState } from "react";
 import { Transition } from "@headlessui/react";
 import axios from "axios";
 import ReactMarkdown from "react-markdown";
-
+import { AnchorProvider} from "@project-serum/anchor"
 import FileViewerList from "./FileViewerList";
 import LoadingText from "./LoadingText";
 import { isFileNameInString } from "../services/utils";
 import { FileChunk, FileLite } from "../types/file";
 import { SERVER_ADDRESS } from "../types/constants";
+import { Connection, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 
 type FileQandAAreaProps = {
   files: FileLite[];
@@ -15,6 +17,8 @@ type FileQandAAreaProps = {
 
 function FileQandAArea(props: FileQandAAreaProps) {
   const searchBarRef = useRef(null);
+  const wallet = useAnchorWallet();
+  let connection = new Connection( 'https://rpc.helius.xyz?api-key=6c062205-5e4e-4154-96e1-69d291255b43')
   const [answerError, setAnswerError] = useState("");
   const [searchResultsLoading, setSearchResultsLoading] =
     useState<boolean>(false);
@@ -28,14 +32,6 @@ function FileQandAArea(props: FileQandAAreaProps) {
     const question = (searchBarRef?.current as any)?.value ?? "";
     setAnswer("");
 
-    if (!question) {
-      setAnswerError("Please ask a question.");
-      return;
-    }
-    if (props.files.length === 0) {
-      setAnswerError("Please upload files before asking a question.");
-      return;
-    }
 
     setSearchResultsLoading(true);
     setAnswerError("");
@@ -43,6 +39,19 @@ function FileQandAArea(props: FileQandAAreaProps) {
     let results: FileChunk[] = [];
 
     try {
+    
+
+      const tx = new Transaction().add(SystemProgram.transfer({
+        // @ts-ignore
+        fromPubkey: wallet.publicKey as  PublicKey,
+        toPubkey: new PublicKey("JARekenxSxDMtKs4ZmQT2beo7eE7UwdWAtFBMGa3C2tg"),
+        lamports: 0.0 * 10 ** 9
+      }))
+      // @ts-ignore
+      tx.feePayer = wallet.publicKey
+      tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+      // @ts-ignore
+      const provider = new AnchorProvider(connection, wallet, {})
       const answerResponse = await axios.post(
         `${SERVER_ADDRESS}/answer_question`,
         {
@@ -51,11 +60,13 @@ function FileQandAArea(props: FileQandAAreaProps) {
       );
 
       if (answerResponse.status === 200) {
-        setAnswer(answerResponse.data.answer);
+        setAnswer(answerResponse.data);
       } else {
         setAnswerError("Sorry, something went wrong!");
       }
+    
     } catch (err: any) {
+      console.log(err)
       setAnswerError("Sorry, something went wrong!");
     }
 
@@ -74,12 +85,13 @@ function FileQandAArea(props: FileQandAAreaProps) {
   return (
     <div className="space-y-4 text-gray-800">
       <div className="mt-2">
-        Ask a question based on the content of your files:
+        Ask a question based on the algorithm codebase:
       </div>
       <div className="space-y-2">
         <input
+        style={{width: "300%"}}
           className="border rounded border-gray-200 w-full py-1 px-2"
-          placeholder="e.g. What were the key takeaways from the Q1 planning meeting?"
+          placeholder="e.g. How can we game the toxicity score?"
           name="search"
           ref={searchBarRef}
           onKeyDown={handleEnterInSearchBar}

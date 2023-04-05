@@ -1,5 +1,61 @@
-@import "./preflight.css";
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: 'Mona Sans';
+  src:
+    url('/Mona-Sans-Black.woff2') format('woff2 supports variations'),
+    url('/Mona-Sans-Black.woff2') format('woff2-variations');
+  font-weight: 200 900;
+  font-stretch: 75% 125%;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
+
+.poppins-font {
+  font-family: 'Poppins', sans-serif;
+}
+
+.mona-font {
+  font-size: 79px;
+  font-family: 'Mona Sans';
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+    background-color: #FF9800;
+}
+input[type="text"]
+{
+    background: transparent;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* example: override wallet button style */
+.wallet-adapter-button:not([disabled]):hover {
+  background-color: #707070;
+}
+
+.messageBox {
+  margin: 20px;
+}
+
+input, select, textarea{
+  color: #000000;
+}
+
+.react-icons {
+  vertical-align: middle;
+}
